@@ -2,18 +2,22 @@
   <div class="container mt-5">
     <h1>Formulario de Registro</h1>
     <form @submit.prevent="registrar">
-      <div class="mb-3">
+      <!-- Nombre -->
+      <div class="mb-3 position-relative">
         <label for="nombre" class="form-label">Nombre</label>
         <input
           type="text"
           v-model="nombre"
           class="form-control"
           required
-          @input="convertirAMayusculas"
+          @input="validarNombre"
         />
-        <div v-if="!nombre" class="text-danger">El nombre es requerido</div>
+        <!-- Mensaje debajo del campo nombre -->
+        <div id="nombre-error" class="text-danger"></div>
       </div>
-      <div class="mb-3">
+
+      <!-- Correo electrónico -->
+      <div class="mb-3 position-relative">
         <label for="correo" class="form-label">Correo Electrónico</label>
         <input
           type="email"
@@ -22,28 +26,45 @@
           required
           @input="validarCorreo"
         />
-        <div v-if="!correoValido" class="text-danger">Por favor, ingrese un correo válido</div>
+        <!-- Mensaje debajo del campo correo -->
+        <div id="correo-error" class="text-danger"></div>
       </div>
-      <div class="mb-3">
+
+      <!-- Contraseña -->
+      <div class="mb-3 position-relative">
         <label for="contraseña" class="form-label">Contraseña</label>
         <input
-          type="password"
+          :type="mostrarContraseña ? 'text' : 'password'"
           v-model="contraseña"
           class="form-control"
           required
+          @input="validarContraseña"
         />
-        <div v-if="!contraseña" class="text-danger">La contraseña es requerida</div>
+        <!-- Botón para mostrar/ocultar la contraseña -->
+        <span @click="mostrarContraseña = !mostrarContraseña" class="position-absolute top-50 end-0 translate-middle-y me-3">
+          <i :class="mostrarContraseña ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+        </span>
+        <!-- Mensaje debajo del campo contraseña -->
+        <div id="contraseña-error" class="text-danger"></div>
       </div>
-      <div class="mb-3">
+
+      <!-- Confirmar contraseña -->
+      <div class="mb-3 position-relative">
         <label for="confirmarContraseña" class="form-label">Confirmar Contraseña</label>
         <input
-          type="password"
+          :type="mostrarContraseña ? 'text' : 'password'"
           v-model="confirmarContraseña"
           class="form-control"
           required
         />
-        <div v-if="contraseña !== confirmarContraseña" class="text-danger">Las contraseñas no coinciden</div>
+        <!-- Botón para mostrar/ocultar la contraseña -->
+        <span @click="mostrarContraseña = !mostrarContraseña" class="position-absolute top-50 end-0 translate-middle-y me-3">
+          <i :class="mostrarContraseña ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+        </span>
+        <!-- Mensaje debajo del campo confirmar contraseña -->
+        <div v-if="submitIntentado && contraseña !== confirmarContraseña" class="text-danger">Las contraseñas no coinciden</div>
       </div>
+
       <button type="submit" class="btn btn-primary" :disabled="!formularioValido">Registrar</button>
     </form>
   </div>
@@ -59,15 +80,19 @@ export default {
       correo: '',
       contraseña: '',
       confirmarContraseña: '',
-      correoValido: true
+      nombreValido: false,
+      correoValido: false,
+      contraseñaValida: false,
+      mostrarContraseña: false, // Variable para controlar mostrar/ocultar contraseña
+      submitIntentado: false
     }
   },
   computed: {
     formularioValido () {
       return (
-        this.nombre &&
+        this.nombreValido &&
         this.correoValido &&
-        this.contraseña &&
+        this.contraseñaValida &&
         this.contraseña === this.confirmarContraseña
       )
     }
@@ -75,18 +100,51 @@ export default {
   methods: {
     ...mapActions(['registrarUsuario']),
 
-    // Convierte el nombre a mayúsculas automáticamente
-    convertirAMayusculas () {
-      this.nombre = this.nombre.toUpperCase()
+    // Validar que el nombre sea texto y convertir a mayúsculas
+    validarNombre () {
+      const regex = /^[A-Za-z\s]+$/ // Solo letras y espacios
+      this.nombre = this.nombre.replace(/[^A-Za-z\s]/g, '') // Eliminar números y caracteres no permitidos
+      if (!regex.test(this.nombre)) {
+        document.getElementById('nombre-error').innerHTML =
+          'El nombre debe contener solo letras'
+        this.nombreValido = false
+      } else {
+        this.nombre = this.nombre.toUpperCase() // Convertir a mayúsculas
+        document.getElementById('nombre-error').innerHTML = ''
+        this.nombreValido = true
+      }
     },
 
-    // Valida el correo electrónico
+    // Validar correo electrónico completo con ejemplo
     validarCorreo () {
       const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-      this.correoValido = regex.test(this.correo)
+      if (!regex.test(this.correo)) {
+        document.getElementById('correo-error').innerHTML =
+          'Por favor, ingrese un correo válido. Ejemplo: estebanperez@gmail.com'
+        this.correoValido = false
+      } else {
+        document.getElementById('correo-error').innerHTML = ''
+        this.correoValido = true
+      }
     },
 
+    // Validar contraseña alfanumérica (letras y números) y longitud
+    validarContraseña () {
+      const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/ // Alfanumérica, entre 8 y 20 caracteres
+      if (!regex.test(this.contraseña)) {
+        document.getElementById('contraseña-error').innerHTML =
+          'La contraseña debe tener letras y números, y entre 8 y 20 caracteres'
+        this.contraseñaValida = false
+      } else {
+        document.getElementById('contraseña-error').innerHTML = ''
+        this.contraseñaValida = true
+      }
+    },
+
+    // Registrar al usuario y limpiar el formulario
     registrar () {
+      this.submitIntentado = true
+
       if (this.formularioValido) {
         const nuevoUsuario = {
           nombre: this.nombre,
@@ -97,11 +155,44 @@ export default {
         // Registrar el usuario en Vuex
         this.registrarUsuario(nuevoUsuario)
 
+        // Mostrar el mensaje de éxito
         alert('El registro se ha realizado correctamente')
+
+        // Limpiar el formulario
+        this.limpiarFormulario()
       } else {
         alert('Por favor, complete todos los campos correctamente')
       }
+    },
+
+    limpiarFormulario () {
+      this.nombre = ''
+      this.correo = ''
+      this.contraseña = ''
+      this.confirmarContraseña = ''
+      this.nombreValido = false
+      this.correoValido = false
+      this.contraseñaValida = false
+      this.submitIntentado = false
     }
   }
 }
 </script>
+
+<style>
+  .position-relative {
+    position: relative;
+  }
+  .position-absolute {
+    position: absolute;
+  }
+  .translate-middle-y {
+    transform: translateY(-50%);
+  }
+  .text-danger {
+    color: #dc3545 !important;
+  }
+  .text-success {
+    color: #28a745 !important;
+  }
+</style>
