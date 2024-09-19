@@ -1,4 +1,4 @@
-18-09-2024 3:49 tarde
+
 
 # calculo_calificaciones
 
@@ -9,9 +9,27 @@
 npm install
 ```
 
+npm install --legacy-peer-deps
+npm install --force
+
+
 ### Compiles and hot-reloads for development
 ```
 npm run serve
+```
+
+### Lints 
+```
+npm run lint -- --fix
+```
+
+
+
+
+### Lints and fixes files
+```
+npm install gh-pages --save-dev
+npm install gh-pages --save-dev --legacy-peer-deps
 ```
 
 ### Compiles and minifies for production
@@ -19,10 +37,17 @@ npm run serve
 npm run build
 ```
 
-### Lints and fixes files
+### Desplegar
 ```
-npm run lint
+npm run deploy
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### GitHub
+```
+https://matryx-root.github.io/calculo_calificaciones/
+```
+
+
+
+
+
