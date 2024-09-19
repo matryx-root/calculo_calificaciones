@@ -4,14 +4,12 @@
 
 
 
-## Project setup
+### Project setup
 ```
 npm install
-```
-
 npm install --legacy-peer-deps
 npm install --force
-
+```
 
 ### Compiles and hot-reloads for development
 ```
@@ -22,9 +20,6 @@ npm run serve
 ```
 npm run lint -- --fix
 ```
-
-
-
 
 ### gh-pages
 ```
@@ -45,6 +40,7 @@ npm run deploy
 ### GitHub
 ```
 https://matryx-root.github.io/calculo_calificaciones/
+
 ```
 
 
