@@ -26,7 +26,7 @@ npm run lint -- --fix
 
 
 
-### Lints and fixes files
+### gh-pages
 ```
 npm install gh-pages --save-dev
 npm install gh-pages --save-dev --legacy-peer-deps
